@@ -2,7 +2,8 @@ import { io } from 'socket.io-client';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const SOCKET_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000';
+// Use computer's local IP so physical devices on the same Wi-Fi can connect
+const SOCKET_URL = 'http://10.255.97.241:5000';
 
 class SocketService {
   socket: any = null;

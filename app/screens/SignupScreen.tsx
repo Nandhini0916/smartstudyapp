@@ -20,6 +20,8 @@ export default function SignupScreen() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [countryCode, setCountryCode] = useState('+91');
+  const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -32,6 +34,10 @@ export default function SignupScreen() {
     }
     if (!email.trim() || !email.includes('@')) {
       Alert.alert('Error', 'Please enter a valid email');
+      return false;
+    }
+    if (!mobile.trim()) {
+      Alert.alert('Error', 'Please enter your mobile number');
       return false;
     }
     if (password.length < 6) {
@@ -50,9 +56,11 @@ export default function SignupScreen() {
 
     setIsLoading(true);
     try {
+      const fullMobile = `${countryCode} ${mobile}`;
       const response = await api.post('/auth/register', {
         name,
         email,
+        mobile: fullMobile,
         password,
       });
       
@@ -108,6 +116,27 @@ export default function SignupScreen() {
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
+            />
+          </View>
+
+          {/* Mobile Input */}
+          <View style={styles.inputContainer}>
+            <Ionicons name="call-outline" size={20} color="#4A6CF7" style={styles.inputIcon} />
+            <TextInput
+              style={styles.countryCodeInput}
+              value={countryCode}
+              onChangeText={setCountryCode}
+              keyboardType="phone-pad"
+              maxLength={5}
+            />
+            <View style={styles.verticalDivider} />
+            <TextInput
+              style={styles.input}
+              placeholder="Mobile Number"
+              placeholderTextColor="#999"
+              value={mobile}
+              onChangeText={setMobile}
+              keyboardType="phone-pad"
             />
           </View>
 
@@ -228,6 +257,19 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 16,
     color: '#333',
+  },
+  countryCodeInput: {
+    fontSize: 16,
+    color: '#333',
+    minWidth: 35,
+    textAlign: 'center',
+    paddingVertical: 14,
+  },
+  verticalDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: '#E0E0E0',
+    marginHorizontal: 12,
   },
   termsContainer: {
     marginBottom: 24,

@@ -152,10 +152,17 @@ export default function ScanPreviewScreen() {
     setIsProcessing(false);
     
     // Show appropriate alert based on detected type
-    const alertTitle = contentType === 'math' ? '📐 Math Problem Detected!' : '📝 Text Content Detected!';
-    const alertMessage = contentType === 'math' 
-      ? `We found: ${detectedContent}\n\nWould you like to solve this math problem?`
-      : `We found: "${detectedContent.substring(0, 100)}${detectedContent.length > 100 ? '...' : ''}"\n\nWould you like to analyze this text?`;
+    if (contentType !== 'math') {
+      Alert.alert(
+        'Invalid Content',
+        'Please scan only math problems. Text analysis is not supported from this scanner.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    const alertTitle = '📐 Math Problem Detected!';
+    const alertMessage = `We found: ${detectedContent}\n\nWould you like to solve this math problem?`;
     
     Alert.alert(
       alertTitle,
@@ -165,45 +172,25 @@ export default function ScanPreviewScreen() {
           text: 'Edit', 
           style: 'cancel',
           onPress: () => {
-            if (contentType === 'math') {
-              router.push({
-                pathname: '/screens/mathsolver',
-                params: { 
-                  scannedQuestion: detectedContent,
-                  photoUri: photoUri as string
-                }
-              });
-            } else {
-              router.push({
-                pathname: '/screens/textanalysis',
-                params: { 
-                  scannedText: detectedContent,
-                  photoUri: photoUri as string
-                }
-              });
-            }
+            router.push({
+              pathname: '/screens/mathsolver',
+              params: { 
+                scannedQuestion: detectedContent,
+                photoUri: photoUri as string
+              }
+            });
           }
         },
         { 
-          text: contentType === 'math' ? 'Solve Now' : 'Analyze Now', 
+          text: 'Solve Now', 
           onPress: () => {
-            if (contentType === 'math') {
-              router.push({
-                pathname: '/screens/mathsolver',
-                params: { 
-                  scannedQuestion: detectedContent,
-                  photoUri: photoUri as string
-                }
-              });
-            } else {
-              router.push({
-                pathname: '/screens/textanalysis',
-                params: { 
-                  scannedText: detectedContent,
-                  photoUri: photoUri as string
-                }
-              });
-            }
+            router.push({
+              pathname: '/screens/mathsolver',
+              params: { 
+                scannedQuestion: detectedContent,
+                photoUri: photoUri as string
+              }
+            });
           }
         }
       ]

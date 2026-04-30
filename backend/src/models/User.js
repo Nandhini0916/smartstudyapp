@@ -13,6 +13,11 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
+  mobile: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   password: {
     type: String,
     required: [true, 'Password is required']
@@ -49,9 +54,8 @@ const userSchema = new mongoose.Schema({
 });
 
 // Update updatedAt on save
-userSchema.pre('save', function(next) {
+userSchema.pre('save', function() {
   this.updatedAt = Date.now();
-  next();
 });
 
 module.exports = mongoose.model('User', userSchema);

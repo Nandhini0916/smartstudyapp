@@ -8,7 +8,7 @@ const router = express.Router();
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, mobile } = req.body;
     
     // Check if user exists
     const existingUser = await User.findOne({ email });
@@ -23,7 +23,8 @@ router.post('/register', async (req, res) => {
     const user = await User.create({
       name,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      mobile: mobile || ''
     });
     
     // Generate token
@@ -36,6 +37,7 @@ router.post('/register', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        mobile: user.mobile,
         xp: user.xp,
         streak: user.streak
       }
@@ -73,6 +75,44 @@ router.post('/login', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        mobile: user.mobile,
+        xp: user.xp,
+        streak: user.streak
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update Profile
+const auth = require('../middleware/auth');
+router.put('/profile', auth, async (req, res) => {
+  try {
+    const { name, mobile } = req.body;
+    
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: 'Name cannot be empty' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.name = name;
+    if (mobile !== undefined) {
+      user.mobile = mobile;
+    }
+    await user.save();
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        mobile: user.mobile,
         xp: user.xp,
         streak: user.streak
       }

@@ -53,7 +53,7 @@ export default function SplashScreen() {
         ]}
       >
         <MaterialCommunityIcons name="brain" size={100} color="#fff" />
-        <Text style={styles.appName}>SmartStudy</Text>
+        <Text style={styles.appName}>SmartStudyApp</Text>
         <Text style={styles.tagline}>Learn Smarter with AI</Text>
       </Animated.View>
       

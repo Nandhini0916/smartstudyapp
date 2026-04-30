@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -210,7 +211,10 @@ export default function LoginScreen() {
           {/* Google Sign In Button - Only Option */}
           <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignIn}>
             <View style={styles.googleIconContainer}>
-              <Ionicons name="logo-google" size={22} color="#DB4437" />
+              <Image 
+                source={{ uri: 'https://img.icons8.com/color/48/000000/google-logo.png' }} 
+                style={{ width: 24, height: 24 }} 
+              />
             </View>
             <Text style={styles.googleButtonText}>Continue with Google</Text>
           </TouchableOpacity>

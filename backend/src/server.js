@@ -66,20 +66,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('chat-message', async (data) => {
-    try {
-      // Simulate AI typing delay
-      setTimeout(() => {
-        socket.emit('chat-response', {
-          id: Date.now().toString(),
-          text: `You said: "${data.message}". This is a response from the backend AI tutor module.`,
-          isUser: false
-        });
-      }, 1000);
-    } catch (error) {
-      socket.emit('error', { message: 'Failed to process chat message' });
-    }
-  });
+
   
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);

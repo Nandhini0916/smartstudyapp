@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,9 +9,11 @@ export default function ProfileScreen() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
 
-  useEffect(() => {
-    loadUserData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadUserData();
+    }, [])
+  );
 
   const loadUserData = async () => {
     try {
@@ -55,11 +57,11 @@ export default function ProfileScreen() {
   };
 
   const menuItems = [
-    { icon: 'person-outline', label: 'Edit Profile', color: '#4A6CF7' },
-    { icon: 'settings-outline', label: 'Settings', color: '#4A6CF7' },
-    { icon: 'notifications-outline', label: 'Notifications', color: '#4A6CF7' },
-    { icon: 'help-circle-outline', label: 'Help & Support', color: '#4A6CF7' },
-    { icon: 'information-circle-outline', label: 'About', color: '#4A6CF7' },
+    { icon: 'person-outline', label: 'Edit Profile', color: '#4A6CF7', route: '/screens/editprofile' },
+    { icon: 'settings-outline', label: 'Settings', color: '#4A6CF7', route: '/screens/settings' },
+    { icon: 'notifications-outline', label: 'Notifications', color: '#4A6CF7', route: '/screens/notifications' },
+    { icon: 'help-circle-outline', label: 'Help & Support', color: '#4A6CF7', route: '/screens/support' },
+    { icon: 'information-circle-outline', label: 'About', color: '#4A6CF7', route: '/screens/about' },
   ];
 
   return (
@@ -89,7 +91,11 @@ export default function ProfileScreen() {
         </View>
         
         {menuItems.map((item, index) => (
-          <TouchableOpacity key={index} style={styles.menuItem}>
+          <TouchableOpacity 
+            key={index} 
+            style={styles.menuItem}
+            onPress={() => router.push(item.route as any)}
+          >
             <View style={[styles.menuIconContainer, { backgroundColor: item.color + '10' }]}>
               <Ionicons name={item.icon as any} size={22} color={item.color} />
             </View>

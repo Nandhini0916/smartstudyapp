@@ -8,39 +8,50 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useCallback } from 'react';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const [userName, setUserName] = useState('Student');
+
+  useFocusEffect(
+    useCallback(() => {
+      loadUserData();
+    }, [])
+  );
+
+  const loadUserData = async () => {
+    try {
+      const userData = await AsyncStorage.getItem('userData');
+      if (userData) {
+        const user = JSON.parse(userData);
+        if (user.name) {
+          // Get first name only if there are spaces
+          const firstName = user.name.split(' ')[0];
+          setUserName(firstName);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    }
+  };
 
   const quickActions = [
     { 
       id: 1, 
-      icon: 'scan-outline', 
-      label: 'Scan & Solve', 
+      icon: 'calculator-outline', 
+      label: 'Math Solver', 
       color: '#4A6CF7', 
-      screen: '/screens/camerascan'  // Changed to camera scan
+      screen: '/screens/mathsolver' 
     },
     { 
       id: 2, 
-      icon: 'chatbubble-ellipses', 
-      label: 'AI Tutor', 
-      color: '#FF6B35', 
-      screen: '/screens/aitutor' 
-    },
-    { 
-      id: 3, 
       icon: 'document-text', 
       label: 'Text Analyzer', 
       color: '#10B981', 
       screen: '/screens/textanalysis' 
-    },
-    { 
-      id: 4, 
-      icon: 'calculator-outline', 
-      label: 'Formula Finder', 
-      color: '#8B5CF6', 
-      screen: '/screens/mathsolver' 
     },
   ];
 
@@ -48,8 +59,8 @@ export default function HomeScreen() {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <LinearGradient colors={['#4A6CF7', '#6B8CF7']} style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Hello, Student!</Text>
-          <Text style={styles.subGreeting}>Ready to learn something new today?</Text>
+          <Text style={styles.greeting}>Hello, {userName}!</Text>
+          <Text style={styles.subGreeting}>Ready to learn something new today!</Text>
         </View>
         <TouchableOpacity style={styles.profileIcon}>
           <Ionicons name="person-circle-outline" size={40} color="#fff" />
@@ -59,20 +70,24 @@ export default function HomeScreen() {
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         
-        {quickActions.map((action) => (
-          <TouchableOpacity
-            key={action.id}
-            style={styles.actionCard}
-            onPress={() => router.push(action.screen as any)}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.iconContainer, { backgroundColor: action.color + '15' }]}>
-              <Ionicons name={action.icon as any} size={28} color={action.color} />
-            </View>
-            <Text style={styles.actionLabel}>{action.label}</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
-          </TouchableOpacity>
-        ))}
+        <View style={styles.cardsContainer}>
+          {quickActions.map((action) => (
+            <TouchableOpacity
+              key={action.id}
+              style={styles.actionCard}
+              onPress={() => router.push(action.screen as any)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.iconContainer, { backgroundColor: action.color + '15' }]}>
+                <Ionicons name={action.icon as any} size={36} color={action.color} />
+              </View>
+              <View style={styles.actionTextContainer}>
+                <Text style={styles.actionLabel}>{action.label}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#ccc" />
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
     </ScrollView>
   );
@@ -120,31 +135,36 @@ const styles = StyleSheet.create({
     color: '#1A1A2E',
     marginBottom: 16,
   },
+  cardsContainer: {
+    flexDirection: 'column',
+  },
   actionCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
     elevation: 3,
   },
   iconContainer: {
-    width: 54,
-    height: 54,
-    borderRadius: 14,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 20,
+  },
+  actionTextContainer: {
+    flex: 1,
   },
   actionLabel: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: 'bold',
     color: '#333',
   },
 });
