@@ -1,0 +1,40 @@
+import { io } from 'socket.io-client';
+import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const SOCKET_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000';
+
+class SocketService {
+  socket: any = null;
+
+  connect() {
+    if (!this.socket) {
+      this.socket = io(SOCKET_URL, {
+        autoConnect: false,
+      });
+
+      this.socket.on('connect', () => {
+        console.log('Socket connected:', this.socket.id);
+      });
+
+      this.socket.on('disconnect', () => {
+        console.log('Socket disconnected');
+      });
+    }
+
+    if (!this.socket.connected) {
+      this.socket.connect();
+    }
+
+    return this.socket;
+  }
+
+  disconnect() {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+    }
+  }
+}
+
+export default new SocketService();
