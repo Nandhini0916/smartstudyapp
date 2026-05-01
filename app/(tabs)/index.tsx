@@ -1,20 +1,22 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState, useCallback } from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [userName, setUserName] = useState('Student');
+  const { theme } = useTheme();
+  const [user, setUser] = useState<any>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -26,68 +28,81 @@ export default function HomeScreen() {
     try {
       const userData = await AsyncStorage.getItem('userData');
       if (userData) {
-        const user = JSON.parse(userData);
-        if (user.name) {
-          // Get first name only if there are spaces
-          const firstName = user.name.split(' ')[0];
-          setUserName(firstName);
-        }
+        const userDataParsed = JSON.parse(userData);
+        setUser(userDataParsed);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
     }
   };
 
-  const quickActions = [
-    { 
-      id: 1, 
-      icon: 'calculator-outline', 
-      label: 'Math Solver', 
-      color: '#4A6CF7', 
-      screen: '/screens/mathsolver' 
+  const features = [
+    {
+      title: 'Math Solver',
+      description: 'Scan or type math problems for step-by-step solutions',
+      icon: 'calculator',
+      color: '#4A6CF7',
+      route: '/screens/mathsolver',
     },
-    { 
-      id: 2, 
-      icon: 'document-text', 
-      label: 'Text Analyzer', 
-      color: '#10B981', 
-      screen: '/screens/textanalysis' 
+    {
+      title: 'Text Analyzer',
+      description: 'Extract vocabulary and get summaries from your texts',
+      icon: 'text',
+      color: '#00C853',
+      route: '/screens/textanalysis',
     },
   ];
 
+
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <LinearGradient colors={['#4A6CF7', '#6B8CF7']} style={styles.header}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]} showsVerticalScrollIndicator={false}>
+      <LinearGradient colors={theme.colors.header} style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Hello, {userName}!</Text>
+          <Text style={styles.greeting}>Hello, {user?.name?.split(' ')[0] || 'Student'}!</Text>
           <Text style={styles.subGreeting}>Ready to learn something new today!</Text>
         </View>
-        <TouchableOpacity style={styles.profileIcon}>
-          <Ionicons name="person-circle-outline" size={40} color="#fff" />
+
+        <TouchableOpacity style={styles.profileIcon} onPress={() => router.push('/(tabs)/profile')}>
+          {user?.profileImage ? (
+            <Image source={{ uri: user.profileImage }} style={styles.avatarImage} />
+          ) : (
+            <Ionicons name="person-circle-outline" size={40} color="#fff" />
+          )}
         </TouchableOpacity>
       </LinearGradient>
 
       <View style={styles.content}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        
-        <View style={styles.cardsContainer}>
-          {quickActions.map((action) => (
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Explore Features</Text>
+        <View style={styles.featuresGrid}>
+          {features.map((feature, index) => (
             <TouchableOpacity
-              key={action.id}
-              style={styles.actionCard}
-              onPress={() => router.push(action.screen as any)}
-              activeOpacity={0.7}
+              key={index}
+              style={[styles.featureCard, { backgroundColor: theme.colors.card }]}
+              onPress={() => router.push(feature.route as any)}
             >
-              <View style={[styles.iconContainer, { backgroundColor: action.color + '15' }]}>
-                <Ionicons name={action.icon as any} size={36} color={action.color} />
+              <View style={[styles.iconContainer, { backgroundColor: feature.color + '15' }]}>
+                <Ionicons name={feature.icon as any} size={28} color={feature.color} />
               </View>
-              <View style={styles.actionTextContainer}>
-                <Text style={styles.actionLabel}>{action.label}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={24} color="#ccc" />
+              <Text style={[styles.featureTitle, { color: theme.colors.text }]}>{feature.title}</Text>
+              <Text style={[styles.featureDescription, { color: theme.colors.subtext }]}>{feature.description}</Text>
             </TouchableOpacity>
           ))}
         </View>
+
+        <TouchableOpacity style={[styles.upgradeCard, { backgroundColor: theme.colors.card }]}>
+          <LinearGradient
+            colors={['#FF9100', '#FFAB40']}
+            style={styles.upgradeGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            <View style={styles.upgradeInfo}>
+              <Text style={styles.upgradeTitle}>Go Premium</Text>
+              <Text style={styles.upgradeText}>Unlock advanced AI features and unlimited study materials.</Text>
+            </View>
+            <Ionicons name="star" size={32} color="#fff" />
+          </LinearGradient>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -96,17 +111,16 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FF',
   },
   header: {
-    paddingTop: 50,
-    paddingHorizontal: 20,
+    paddingTop: 60,
     paddingBottom: 30,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+    paddingHorizontal: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
   greeting: {
     fontSize: 24,
@@ -116,7 +130,7 @@ const styles = StyleSheet.create({
   subGreeting: {
     fontSize: 14,
     color: '#fff',
-    opacity: 0.9,
+    opacity: 0.8,
     marginTop: 4,
   },
   profileIcon: {
@@ -125,46 +139,82 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
   },
   content: {
     padding: 20,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#1A1A2E',
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  cardsContainer: {
-    flexDirection: 'column',
-  },
-  actionCard: {
+  featuresGrid: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  featureCard: {
+    width: '48%',
     borderRadius: 20,
-    padding: 20,
+    padding: 16,
     marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
     shadowRadius: 10,
-    elevation: 3,
+    elevation: 2,
   },
   iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 50,
+    height: 50,
+    borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 20,
+    marginBottom: 12,
   },
-  actionTextContainer: {
+  featureTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  featureDescription: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  upgradeCard: {
+    marginTop: 10,
+    borderRadius: 20,
+    overflow: 'hidden',
+    elevation: 4,
+    shadowColor: '#FF9100',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
+  upgradeGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+  },
+  upgradeInfo: {
     flex: 1,
+    marginRight: 10,
   },
-  actionLabel: {
+  upgradeTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  upgradeText: {
+    fontSize: 12,
+    color: '#fff',
+    opacity: 0.9,
   },
 });

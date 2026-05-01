@@ -3,13 +3,15 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function AboutScreen() {
   const router = useRouter();
+  const { theme } = useTheme();
 
   return (
-    <View style={styles.container}>
-      <LinearGradient colors={['#4A6CF7', '#6B8CF7']} style={styles.header}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <LinearGradient colors={theme.colors.header} style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
@@ -18,36 +20,36 @@ export default function AboutScreen() {
       </LinearGradient>
       <View style={styles.content}>
         <View style={styles.logoContainer}>
-          <MaterialCommunityIcons name="brain" size={80} color="#4A6CF7" />
-          <Text style={styles.appName}>SmartStudyApp</Text>
-          <Text style={styles.version}>Version 1.0.0</Text>
+          <MaterialCommunityIcons name="brain" size={80} color={theme.colors.primary} />
+          <Text style={[styles.appName, { color: theme.colors.text }]}>SmartStudyApp</Text>
+          <Text style={[styles.version, { color: theme.colors.subtext }]}>Version 1.0.0</Text>
         </View>
 
-        <View style={styles.linksContainer}>
+        <View style={[styles.linksContainer, { backgroundColor: theme.colors.card }]}>
           <TouchableOpacity style={styles.linkRow}>
-            <Text style={styles.linkText}>Terms of Service</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+            <Text style={[styles.linkText, { color: theme.colors.text }]}>Terms of Service</Text>
+            <Ionicons name="chevron-forward" size={20} color={theme.colors.subtext} />
           </TouchableOpacity>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
           <TouchableOpacity style={styles.linkRow}>
-            <Text style={styles.linkText}>Privacy Policy</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+            <Text style={[styles.linkText, { color: theme.colors.text }]}>Privacy Policy</Text>
+            <Ionicons name="chevron-forward" size={20} color={theme.colors.subtext} />
           </TouchableOpacity>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
           <TouchableOpacity style={styles.linkRow}>
-            <Text style={styles.linkText}>Open Source Licenses</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+            <Text style={[styles.linkText, { color: theme.colors.text }]}>Open Source Licenses</Text>
+            <Ionicons name="chevron-forward" size={20} color={theme.colors.subtext} />
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.copyright}>© 2026 SmartStudy. All rights reserved.</Text>
+        <Text style={[styles.copyright, { color: theme.colors.subtext }]}>© 2026 SmartStudy. All rights reserved.</Text>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F9FF' },
+  container: { flex: 1 },
   header: {
     paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -61,11 +63,11 @@ const styles = StyleSheet.create({
   placeholder: { width: 40 },
   content: { flex: 1, padding: 20, alignItems: 'center' },
   logoContainer: { alignItems: 'center', marginTop: 40, marginBottom: 50 },
-  appName: { fontSize: 24, fontWeight: 'bold', color: '#333', marginTop: 16 },
-  version: { fontSize: 14, color: '#666', marginTop: 4 },
-  linksContainer: { width: '100%', backgroundColor: '#fff', borderRadius: 16, paddingHorizontal: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+  appName: { fontSize: 24, fontWeight: 'bold', marginTop: 16 },
+  version: { fontSize: 14, marginTop: 4 },
+  linksContainer: { width: '100%', borderRadius: 16, paddingHorizontal: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
   linkRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 16 },
-  linkText: { fontSize: 16, color: '#333' },
-  divider: { height: 1, backgroundColor: '#F0F0F0' },
-  copyright: { position: 'absolute', bottom: 40, fontSize: 12, color: '#999' }
+  linkText: { fontSize: 16 },
+  divider: { height: 1 },
+  copyright: { position: 'absolute', bottom: 40, fontSize: 12 }
 });

@@ -8,7 +8,7 @@ class OpenAIService {
   async getMathSolution(question) {
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-4-turbo-preview",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
@@ -33,7 +33,7 @@ class OpenAIService {
   async chatWithAI(message, history = []) {
     try {
       const stream = await openai.chat.completions.create({
-        model: "gpt-4-turbo-preview",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
@@ -56,7 +56,7 @@ class OpenAIService {
   async analyzeText(text) {
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-4-turbo-preview",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
@@ -81,7 +81,7 @@ class OpenAIService {
   async getPersonalizedRecommendations(userId, recentActivities) {
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-4-turbo-preview",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",

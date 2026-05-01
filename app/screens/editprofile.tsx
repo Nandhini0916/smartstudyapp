@@ -1,17 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  TextInput, 
+  KeyboardAvoidingView, 
+  Platform, 
+  ScrollView, 
+  ActivityIndicator, 
+  Alert,
+  Image 
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
 import api from '../../services/api';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function EditProfileScreen() {
   const router = useRouter();
+  const { theme } = useTheme();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [countryCode, setCountryCode] = useState('+91');
   const [mobile, setMobile] = useState('');
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImageBase64, setProfileImageBase64] = useState<string | null>(null);
   const [initials, setInitials] = useState('U');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -28,6 +45,7 @@ export default function EditProfileScreen() {
         const user = JSON.parse(userData);
         setName(user.name || '');
         setEmail(user.email || '');
+        setProfileImage(user.profileImage || null);
         
         if (user.mobile) {
           const parts = user.mobile.split(' ');
@@ -50,6 +68,63 @@ export default function EditProfileScreen() {
     }
   };
 
+  const handlePickImage = async () => {
+    Alert.alert(
+      'Profile Photo',
+      'Choose an option',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Choose from Gallery', onPress: handleLaunchLibrary },
+        { text: 'Take Photo', onPress: handleLaunchCamera },
+      ]
+    );
+  };
+
+  const handleLaunchCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'We need camera permissions to take a photo.');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.2,
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
+      if (result.assets[0].base64) {
+        setProfileImageBase64(`data:image/jpeg;base64,${result.assets[0].base64}`);
+      }
+    }
+  };
+
+  const handleLaunchLibrary = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'We need camera roll permissions to change your photo.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.2, 
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
+      if (result.assets[0].base64) {
+        setProfileImageBase64(`data:image/jpeg;base64,${result.assets[0].base64}`);
+      }
+    }
+  };
+
   const handleSave = async () => {
     if (!name.trim()) {
       Alert.alert('Error', 'Name cannot be empty');
@@ -59,9 +134,12 @@ export default function EditProfileScreen() {
     setIsSaving(true);
     try {
       const fullMobile = `${countryCode} ${mobile}`;
-      const response = await api.put('/auth/profile', { name, mobile: fullMobile });
+      const response = await api.put('/auth/profile', { 
+        name, 
+        mobile: fullMobile,
+        profileImage: profileImageBase64 || profileImage 
+      });
       
-      // Update local storage with new user data
       const updatedUser = response.data.user;
       await AsyncStorage.setItem('userData', JSON.stringify(updatedUser));
       
@@ -77,68 +155,78 @@ export default function EditProfileScreen() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-      <LinearGradient colors={['#4A6CF7', '#6B8CF7']} style={styles.header}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <LinearGradient colors={theme.colors.header} style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Edit Profile</Text>
         <View style={styles.placeholder} />
       </LinearGradient>
+      
       <ScrollView style={styles.content}>
         {isLoading ? (
-          <ActivityIndicator size="large" color="#4A6CF7" style={{ marginTop: 50 }} />
+          <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 50 }} />
         ) : (
           <>
             <View style={styles.avatarContainer}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{initials}</Text>
-              </View>
-              <TouchableOpacity>
-                <Text style={styles.changePhotoText}>Change Photo</Text>
+              <TouchableOpacity onPress={handlePickImage} activeOpacity={0.8}>
+                <View style={[styles.avatar, { backgroundColor: theme.colors.primary }]}>
+                  {profileImage ? (
+                    <Image source={{ uri: profileImage }} style={styles.avatarImage} />
+                  ) : (
+                    <Text style={styles.avatarText}>{initials}</Text>
+                  )}
+                  <View style={[styles.cameraIconBadge, { backgroundColor: theme.colors.secondary }]}>
+                    <Ionicons name="camera" size={16} color="#fff" />
+                  </View>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handlePickImage}>
+                <Text style={[styles.changePhotoText, { color: theme.colors.primary }]}>Change Photo</Text>
               </TouchableOpacity>
             </View>
 
-            <View style={styles.formContainer}>
-              <Text style={styles.label}>Full Name</Text>
+            <View style={[styles.formContainer, { backgroundColor: theme.colors.card }]}>
+              <Text style={[styles.label, { color: theme.colors.subtext }]}>Full Name</Text>
               <TextInput 
-                style={styles.input} 
+                style={[styles.input, { backgroundColor: theme.colors.background, borderColor: theme.colors.border, color: theme.colors.text }]} 
                 placeholder="Enter your name" 
                 value={name} 
                 onChangeText={setName}
-                placeholderTextColor="#999" 
+                placeholderTextColor={theme.colors.subtext} 
               />
 
-              <Text style={styles.label}>Email Address (Cannot be changed)</Text>
+              <Text style={[styles.label, { color: theme.colors.subtext }]}>Email Address</Text>
               <TextInput 
-                style={[styles.input, styles.disabledInput]} 
+                style={[styles.input, styles.disabledInput, { backgroundColor: theme.dark ? '#1e293b' : '#f0f0f0', borderColor: theme.colors.border, color: theme.colors.subtext }]} 
                 value={email} 
                 editable={false}
-                placeholderTextColor="#999" 
+                placeholderTextColor={theme.colors.subtext} 
               />
 
-              <Text style={styles.label}>Mobile Number</Text>
-              <View style={styles.mobileInputContainer}>
+              <Text style={[styles.label, { color: theme.colors.subtext }]}>Mobile Number</Text>
+              <View style={[styles.mobileInputContainer, { backgroundColor: theme.colors.background, borderColor: theme.colors.border }]}>
                 <TextInput
-                  style={styles.countryCodeInput}
+                  style={[styles.countryCodeInput, { color: theme.colors.text }]}
                   value={countryCode}
                   onChangeText={setCountryCode}
                   keyboardType="phone-pad"
                   maxLength={5}
                 />
-                <View style={styles.verticalDivider} />
+                <View style={[styles.verticalDivider, { backgroundColor: theme.colors.border }]} />
                 <TextInput 
-                  style={[styles.input, { marginBottom: 0, borderWidth: 0, paddingHorizontal: 0 }]} 
-                  placeholder="Enter your mobile number" 
+                  style={[styles.input, { marginBottom: 0, borderWidth: 0, paddingHorizontal: 0, color: theme.colors.text }]} 
+                  placeholder="Enter mobile number" 
                   value={mobile} 
                   onChangeText={setMobile}
                   keyboardType="phone-pad"
-                  placeholderTextColor="#999" 
+                  placeholderTextColor={theme.colors.subtext} 
                 />
               </View>
 
               <TouchableOpacity  
-                style={[styles.saveButton, isSaving && styles.saveButtonDisabled]} 
+                style={[styles.saveButton, { backgroundColor: theme.colors.primary }, isSaving && styles.saveButtonDisabled]} 
                 onPress={handleSave}
                 disabled={isSaving}
               >
@@ -157,7 +245,7 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F9FF' },
+  container: { flex: 1 },
   header: {
     paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -171,17 +259,45 @@ const styles = StyleSheet.create({
   placeholder: { width: 40 },
   content: { flex: 1, padding: 20 },
   avatarContainer: { alignItems: 'center', marginTop: 20, marginBottom: 30 },
-  avatar: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#4A6CF7', justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
+  avatar: { 
+    width: 100, 
+    height: 100, 
+    borderRadius: 50, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginBottom: 12,
+    position: 'relative'
+  },
+  avatarImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
   avatarText: { fontSize: 40, fontWeight: 'bold', color: '#fff' },
-  changePhotoText: { color: '#4A6CF7', fontSize: 16, fontWeight: '600' },
-  formContainer: { backgroundColor: '#fff', borderRadius: 16, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
-  label: { fontSize: 14, color: '#666', marginBottom: 8, fontWeight: '500' },
-  input: { flex: 1, backgroundColor: '#F8F9FF', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, padding: 14, fontSize: 16, color: '#333', marginBottom: 20 },
-  mobileInputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F8F9FF', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, marginBottom: 20, paddingHorizontal: 14 },
-  countryCodeInput: { fontSize: 16, color: '#333', minWidth: 35, textAlign: 'center', paddingVertical: 14 },
-  verticalDivider: { width: 1, height: 24, backgroundColor: '#E0E0E0', marginHorizontal: 12 },
-  disabledInput: { backgroundColor: '#f0f0f0', color: '#888' },
-  saveButton: { backgroundColor: '#4A6CF7', borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 10 },
+  cameraIconBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#fff'
+  },
+  changePhotoText: { fontSize: 16, fontWeight: '600' },
+  formContainer: { 
+    borderRadius: 16, padding: 20, 
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 
+  },
+  label: { fontSize: 14, marginBottom: 8, fontWeight: '500' },
+  input: { flex: 1, borderWidth: 1, borderRadius: 12, padding: 14, fontSize: 16, marginBottom: 20 },
+  mobileInputContainer: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, marginBottom: 20, paddingHorizontal: 14 },
+  countryCodeInput: { fontSize: 16, minWidth: 35, textAlign: 'center', paddingVertical: 14 },
+  verticalDivider: { width: 1, height: 24, marginHorizontal: 12 },
+  disabledInput: { opacity: 0.8 },
+  saveButton: { borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 10 },
   saveButtonDisabled: { opacity: 0.7 },
   saveButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
 });

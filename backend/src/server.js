@@ -34,11 +34,17 @@ app.use(express.json());
 const authRoutes = require('./routes/authRoutes');
 const progressRoutes = require('./routes/progressRoutes');
 const vocabularyRoutes = require('./routes/vocabularyRoutes');
+const documentRoutes = require('./routes/documentRoutes');
+const socketHandler = require('./socket/socketHandler');
+
+
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/vocabulary', vocabularyRoutes);
+app.use('/api/documents', documentRoutes);
+
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -50,28 +56,8 @@ app.get('/api/health', (req, res) => {
 });
 
 // Socket.io handlers
-io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
-  
-  socket.on('math-query', async (data) => {
-    try {
-      // Simulate processing time
-      setTimeout(() => {
-        socket.emit('math-solution', {
-          solution: `Solution for: ${data.problem}\n\n📐 Step 1: Analyze the problem\n🔢 Step 2: Apply relevant formulas\n📝 Step 3: Calculate step by step\n\n✨ Answer: (Simulated response from backend)`
-        });
-      }, 1500);
-    } catch (error) {
-      socket.emit('error', { message: 'Failed to process math problem' });
-    }
-  });
+socketHandler(io);
 
-
-  
-  socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
-  });
-});
 
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {

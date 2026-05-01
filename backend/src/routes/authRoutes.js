@@ -38,9 +38,11 @@ router.post('/register', async (req, res) => {
         name: user.name,
         email: user.email,
         mobile: user.mobile,
+        profileImage: user.profileImage,
         xp: user.xp,
         streak: user.streak
       }
+
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -76,9 +78,11 @@ router.post('/login', async (req, res) => {
         name: user.name,
         email: user.email,
         mobile: user.mobile,
+        profileImage: user.profileImage,
         xp: user.xp,
         streak: user.streak
       }
+
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -89,7 +93,7 @@ router.post('/login', async (req, res) => {
 const auth = require('../middleware/auth');
 router.put('/profile', auth, async (req, res) => {
   try {
-    const { name, mobile } = req.body;
+    const { name, mobile, profileImage } = req.body;
     
     if (!name || !name.trim()) {
       return res.status(400).json({ message: 'Name cannot be empty' });
@@ -104,6 +108,9 @@ router.put('/profile', auth, async (req, res) => {
     if (mobile !== undefined) {
       user.mobile = mobile;
     }
+    if (profileImage !== undefined) {
+      user.profileImage = profileImage;
+    }
     await user.save();
 
     res.json({
@@ -113,10 +120,12 @@ router.put('/profile', auth, async (req, res) => {
         name: user.name,
         email: user.email,
         mobile: user.mobile,
+        profileImage: user.profileImage,
         xp: user.xp,
         streak: user.streak
       }
     });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

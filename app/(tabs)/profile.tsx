@@ -1,12 +1,14 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Image } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { theme } = useTheme();
   const [user, setUser] = useState<any>(null);
 
   useFocusEffect(
@@ -39,16 +41,9 @@ export default function ProfileScreen() {
             try {
               await AsyncStorage.removeItem('userToken');
               await AsyncStorage.removeItem('userData');
-              
-              console.log('Storage cleared, redirecting to login...');
-              
-              setTimeout(() => {
-                router.replace('/screens/LoginScreen');
-              }, 100);
-              
+              router.replace('/screens/LoginScreen');
             } catch (error) {
               console.error('Logout error:', error);
-              Alert.alert('Error', 'Failed to logout. Please try again.');
             }
           }
         }
@@ -65,29 +60,31 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <LinearGradient colors={['#4A6CF7', '#6B8CF7']} style={styles.header}>
-        {/* Name on Left, Profile Icon on Right */}
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]} showsVerticalScrollIndicator={false}>
+      <LinearGradient colors={theme.colors.header} style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user?.name || 'Student'}</Text>
             <Text style={styles.userEmail}>{user?.email || 'user@example.com'}</Text>
           </View>
           
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
-            </Text>
+          <View style={[styles.avatar, { backgroundColor: theme.colors.card }]}>
+            {user?.profileImage ? (
+              <Image source={{ uri: user.profileImage }} style={styles.avatarImage} />
+            ) : (
+              <Text style={[styles.avatarText, { color: theme.colors.primary }]}>
+                {user?.name?.charAt(0).toUpperCase() || 'U'}
+              </Text>
+            )}
           </View>
         </View>
       </LinearGradient>
 
       <View style={{ height: 20 }} />
 
-      {/* Menu Section */}
-      <View style={styles.menuContainer}>
-        <View style={styles.menuHeader}>
-          <Text style={styles.menuHeaderText}>Account Settings</Text>
+      <View style={[styles.menuContainer, { backgroundColor: theme.colors.card }]}>
+        <View style={[styles.menuHeader, { borderBottomColor: theme.colors.border }]}>
+          <Text style={[styles.menuHeaderText, { color: theme.colors.subtext }]}>Account Settings</Text>
         </View>
         
         {menuItems.map((item, index) => (
@@ -99,12 +96,12 @@ export default function ProfileScreen() {
             <View style={[styles.menuIconContainer, { backgroundColor: item.color + '10' }]}>
               <Ionicons name={item.icon as any} size={22} color={item.color} />
             </View>
-            <Text style={styles.menuText}>{item.label}</Text>
-            <Ionicons name="chevron-forward" size={20} color="#CCC" />
+            <Text style={[styles.menuText, { color: theme.colors.text }]}>{item.label}</Text>
+            <Ionicons name="chevron-forward" size={20} color={theme.colors.subtext} />
           </TouchableOpacity>
         ))}
         
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
         
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <View style={[styles.menuIconContainer, { backgroundColor: '#FF3B3010' }]}>
@@ -115,7 +112,6 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
       
-      {/* Extra bottom padding */}
       <View style={styles.bottomPadding} />
     </ScrollView>
   );
@@ -124,7 +120,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FF',
   },
   header: {
     paddingTop: 50,
@@ -157,7 +152,6 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -166,13 +160,16 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
+  avatarImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+  },
   avatarText: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#4A6CF7',
   },
   menuContainer: {
-    backgroundColor: '#fff',
     borderRadius: 20,
     marginHorizontal: 20,
     marginTop: 8,
@@ -188,13 +185,11 @@ const styles = StyleSheet.create({
   menuHeader: {
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
     marginBottom: 4,
   },
   menuHeaderText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#999',
     letterSpacing: 0.5,
   },
   menuItem: {
@@ -213,12 +208,10 @@ const styles = StyleSheet.create({
   menuText: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
     fontWeight: '500',
   },
   divider: {
     height: 1,
-    backgroundColor: '#F0F0F0',
     marginVertical: 8,
   },
   logoutButton: {

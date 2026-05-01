@@ -13,14 +13,17 @@ module.exports = (io) => {
     });
 
     socket.on('math-query', async (data, callback) => {
-      const { userId, query } = data;
+      const { userId } = data;
+      const problem = data.problem || data.query;
+
       
       try {
         // Emit processing status
         socket.emit('math-processing', { status: 'processing' });
         
         // Get AI solution
-        const solution = await OpenAIService.getMathSolution(query);
+        const solution = await OpenAIService.getMathSolution(problem);
+
         
         // Emit step-by-step in real-time
         if (solution.steps && solution.steps.length > 0) {
