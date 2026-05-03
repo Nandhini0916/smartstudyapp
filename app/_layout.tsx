@@ -15,7 +15,6 @@ function AppLayout() {
         <Stack.Screen name="screens/SignupScreen" options={{ headerShown: false, presentation: 'card' }} />
         <Stack.Screen name="screens/mathsolver" options={{ headerShown: false, presentation: 'card' }} />
         <Stack.Screen name="screens/textanalysis" options={{ headerShown: false, presentation: 'card' }} />
-        <Stack.Screen name="screens/camerascan" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="screens/scanpreview" options={{ headerShown: false, presentation: 'card' }} />
         <Stack.Screen name="screens/editprofile" options={{ headerShown: false, presentation: 'card' }} />
         <Stack.Screen name="screens/settings" options={{ headerShown: false, presentation: 'card' }} />

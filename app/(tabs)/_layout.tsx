@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 
 export default function TabLayout() {
@@ -42,6 +42,15 @@ export default function TabLayout() {
           title: 'Home',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="vocabulary"
+        options={{
+          title: 'Study',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="book-open-page-variant-outline" size={size} color={color} />
           ),
         }}
       />

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const Vocabulary = require('../models/Vocabulary');
+const OpenAIService = require('../services/openaiService');
 
 // Get all vocabulary for a user
 router.get('/', auth, async (req, res) => {
@@ -64,15 +65,8 @@ router.post('/analyze-text', auth, async (req, res) => {
     const { text } = req.body;
     if (!text) return res.status(400).json({ message: 'Text is required' });
     
-    // Simple simulated analysis for demonstration purposes
-    const words = text.split(' ');
-    const longWords = words.filter(word => word.length > 5);
-    const wordMeanings = longWords.slice(0, 5).map(word => ({
-      word: word,
-      meaning: `Simulated meaning of "${word}" from the backend.`
-    }));
-    
-    res.json({ results: wordMeanings });
+    const analysis = await OpenAIService.analyzeText(text);
+    res.json(analysis);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

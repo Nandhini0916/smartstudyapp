@@ -77,7 +77,7 @@ class AIService {
             role: 'system',
             content:
               'Extract difficult words (7+ letters) from the text and provide simple definitions. ' +
-              'Return ONLY valid JSON (no markdown fences) with a single key "words" containing an array of objects. ' +
+              'Return ONLY valid JSON (no markdown fences) with a single key "results" containing an array of objects. ' +
               'Each object must have: word (string), definition (string), partOfSpeech (string).',
           },
           { role: 'user', content: text },

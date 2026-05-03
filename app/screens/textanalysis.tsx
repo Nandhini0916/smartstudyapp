@@ -83,10 +83,16 @@ export default function TextAnalysis() {
           timeout: 30000, 
         });
 
-        if (response.data && response.data.results) {
-          setResults(response.data.results);
-        } else if (Array.isArray(response.data)) {
-          setResults(response.data);
+        if (response.data) {
+          if (response.data.results && Array.isArray(response.data.results)) {
+            setResults(response.data.results);
+          } else if (response.data.words && Array.isArray(response.data.words)) {
+            setResults(response.data.words);
+          } else if (Array.isArray(response.data)) {
+            setResults(response.data);
+          } else {
+            console.warn('Unexpected response format:', response.data);
+          }
         }
       } catch (error: any) {
         console.error('Upload Error:', error);
@@ -102,6 +108,21 @@ export default function TextAnalysis() {
       console.error('Picker Error:', error);
       Alert.alert('Error', 'Failed to select document');
       setAnalyzing(false);
+    }
+  };
+
+  const addToVocabulary = async (item: { word: string; definition: string; partOfSpeech?: string }) => {
+    try {
+      await api.post('/vocabulary', {
+        word: item.word,
+        definition: item.definition,
+        partOfSpeech: item.partOfSpeech?.toLowerCase() || 'noun',
+      });
+      Alert.alert('Success', `"${item.word}" has been added to your vocabulary!`);
+    } catch (error: any) {
+      console.error('Add Vocab Error:', error);
+      const msg = error.response?.data?.message || 'Failed to add word';
+      Alert.alert('Notice', msg);
     }
   };
 
@@ -182,7 +203,10 @@ export default function TextAnalysis() {
                   )}
                 </View>
                 <Text style={[styles.definition, { color: theme.colors.subtext }]}>{item.definition}</Text>
-                <TouchableOpacity style={[styles.addButton, { borderTopColor: theme.colors.border }]}>
+                <TouchableOpacity 
+                  style={[styles.addButton, { borderTopColor: theme.colors.border }]}
+                  onPress={() => addToVocabulary(item)}
+                >
                   <Ionicons name="add-circle-outline" size={20} color={theme.colors.primary} />
                   <Text style={[styles.addButtonText, { color: theme.colors.primary }]}>Add to Vocabulary</Text>
                 </TouchableOpacity>
