@@ -12,14 +12,16 @@ import {
   Animated,
   Dimensions,
   Keyboard,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
 import socketService from '../../services/socket';
 import { useTheme } from '../../context/ThemeContext';
-import { BlurView } from 'expo-blur';
 
 const { width, height } = Dimensions.get('window');
 
@@ -34,6 +36,7 @@ export default function MathSolver() {
   const [hint, setHint] = useState('');
   const [status, setStatus] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
+  const [showScanSheet, setShowScanSheet] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
@@ -140,6 +143,67 @@ export default function MathSolver() {
     setIsSolving(false);
   };
 
+  const openScanSheet = () => {
+    Keyboard.dismiss();
+    setShowScanSheet(true);
+  };
+
+  const handleTakePhoto = async () => {
+    setShowScanSheet(false);
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Camera permission is needed to scan questions.');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.8,
+        base64: true,
+      });
+      if (!result.canceled && result.assets[0]) {
+        router.push({
+          pathname: '/screens/scanpreview',
+          params: {
+            photoUri: result.assets[0].uri,
+            photoBase64: result.assets[0].base64 || '',
+          },
+        });
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Failed to open camera. Please try again.');
+    }
+  };
+
+  const handleChooseGallery = async () => {
+    setShowScanSheet(false);
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Gallery access is needed to select images.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.8,
+        base64: true,
+      });
+      if (!result.canceled && result.assets[0]) {
+        router.push({
+          pathname: '/screens/scanpreview',
+          params: {
+            photoUri: result.assets[0].uri,
+            photoBase64: result.assets[0].base64 || '',
+          },
+        });
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Failed to open gallery. Please try again.');
+    }
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Dynamic Header */}
@@ -202,9 +266,9 @@ export default function MathSolver() {
           />
           
           <View style={styles.actionGrid}>
-            <TouchableOpacity 
-              style={[styles.actionButton, { backgroundColor: theme.dark ? '#1E293B' : '#F1F5F9' }]} 
-              onPress={() => router.push('/screens/camerascan')}
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: theme.dark ? '#1E293B' : '#F1F5F9' }]}
+              onPress={openScanSheet}
               disabled={isSolving}
             >
               <Ionicons name="camera" size={20} color={theme.colors.primary} />
@@ -281,13 +345,13 @@ export default function MathSolver() {
 
             {hint && !isSolving && (
               <Animated.View style={[styles.hintBox, { opacity: fadeAnim }]}>
-                <BlurView intensity={theme.dark ? 20 : 40} style={styles.blurHint}>
+                <View style={[styles.blurHint, { backgroundColor: theme.dark ? 'rgba(255,179,0,0.12)' : 'rgba(255,179,0,0.1)' }]}>
                   <View style={styles.hintHeader}>
                     <Ionicons name="bulb" size={20} color="#FFB300" />
                     <Text style={styles.hintTitle}>STUDY TIP</Text>
                   </View>
                   <Text style={[styles.hintBody, { color: theme.dark ? '#E2E8F0' : '#475569' }]}>{hint}</Text>
-                </BlurView>
+                </View>
               </Animated.View>
             )}
           </View>
@@ -295,6 +359,64 @@ export default function MathSolver() {
         
         <View style={{ height: 60 }} />
       </ScrollView>
+
+      {/* ── Scan Action Sheet Modal ── */}
+      <Modal
+        visible={showScanSheet}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowScanSheet(false)}
+      >
+        <Pressable style={styles.sheetBackdrop} onPress={() => setShowScanSheet(false)}>
+          <Pressable style={[styles.sheetContainer, { backgroundColor: theme.colors.card }]}>
+            {/* Handle bar */}
+            <View style={[styles.sheetHandle, { backgroundColor: theme.colors.border }]} />
+
+            <Text style={[styles.sheetTitle, { color: theme.colors.text }]}>Scan a Question</Text>
+            <Text style={[styles.sheetSubtitle, { color: theme.colors.subtext }]}>
+              Choose how to capture your math problem
+            </Text>
+
+            {/* Take Photo */}
+            <TouchableOpacity
+              style={[styles.sheetOption, { backgroundColor: theme.colors.primary + '12', borderColor: theme.colors.primary + '30' }]}
+              onPress={handleTakePhoto}
+            >
+              <View style={[styles.sheetOptionIcon, { backgroundColor: theme.colors.primary }]}>
+                <Ionicons name="camera" size={22} color="#fff" />
+              </View>
+              <View style={styles.sheetOptionText}>
+                <Text style={[styles.sheetOptionTitle, { color: theme.colors.text }]}>Take Photo</Text>
+                <Text style={[styles.sheetOptionDesc, { color: theme.colors.subtext }]}>Open camera to capture question</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={theme.colors.subtext} />
+            </TouchableOpacity>
+
+            {/* Choose from Gallery */}
+            <TouchableOpacity
+              style={[styles.sheetOption, { backgroundColor: theme.colors.secondary + '12', borderColor: theme.colors.secondary + '30' }]}
+              onPress={handleChooseGallery}
+            >
+              <View style={[styles.sheetOptionIcon, { backgroundColor: theme.colors.secondary }]}>
+                <Ionicons name="images" size={22} color="#fff" />
+              </View>
+              <View style={styles.sheetOptionText}>
+                <Text style={[styles.sheetOptionTitle, { color: theme.colors.text }]}>Choose from Gallery</Text>
+                <Text style={[styles.sheetOptionDesc, { color: theme.colors.subtext }]}>Pick an existing photo</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={theme.colors.subtext} />
+            </TouchableOpacity>
+
+            {/* Cancel */}
+            <TouchableOpacity
+              style={[styles.sheetCancel, { backgroundColor: theme.dark ? '#334155' : '#F1F5F9' }]}
+              onPress={() => setShowScanSheet(false)}
+            >
+              <Text style={[styles.sheetCancelText, { color: theme.colors.subtext }]}>Cancel</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -351,8 +473,77 @@ const styles = StyleSheet.create({
   pulseContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginVertical: 20 },
   pulseText: { fontSize: 13, fontWeight: 'bold' },
   hintBox: { borderRadius: 24, overflow: 'hidden', marginTop: 15 },
-  blurHint: { padding: 22, backgroundColor: 'rgba(255, 179, 0, 0.1)' },
+  blurHint: { padding: 22, borderRadius: 20 },
   hintHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
   hintTitle: { fontSize: 12, fontWeight: '900', color: '#FFB300', letterSpacing: 1 },
-  hintBody: { fontSize: 14, fontWeight: '500', lineHeight: 22 }
+  hintBody: { fontSize: 14, fontWeight: '500', lineHeight: 22 },
+  // ── Scan Sheet ──
+  sheetBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  sheetContainer: {
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    padding: 24,
+    paddingBottom: 36,
+    gap: 12,
+    elevation: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+  },
+  sheetHandle: {
+    width: 44,
+    height: 4,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 8,
+  },
+  sheetTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  sheetSubtitle: {
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  sheetOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    gap: 14,
+  },
+  sheetOptionIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sheetOptionText: { flex: 1 },
+  sheetOptionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  sheetOptionDesc: {
+    fontSize: 12,
+    fontWeight: '400',
+  },
+  sheetCancel: {
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 18,
+    marginTop: 4,
+  },
+  sheetCancelText: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
 });
