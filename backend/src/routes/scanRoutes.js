@@ -68,14 +68,39 @@ Rules:
       mathContent: result.mathContent || '',
     });
   } catch (error) {
-    console.error('Scan Process Error:', error);
+    console.error('--- SCAN PROCESS ERROR ---');
+    console.error('Status:', error.status);
+    console.error('Message:', error.message);
+    if (error.response) {
+      console.error('Response Data:', error.response.data);
+    }
+    console.error('---------------------------');
+
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(500).json({ 
+        message: 'Backend Configuration Error', 
+        details: 'GROQ_API_KEY is missing in .env file' 
+      });
+    }
 
     // Friendly error for rate limits
     if (error.status === 429) {
       return res.status(429).json({ message: 'AI service is busy. Please try again in a moment.' });
     }
 
-    res.status(500).json({ message: 'Failed to process image', details: error.message });
+    // Check for Groq's 4MB limit
+    if (error.message?.includes('413') || error.status === 413) {
+      return res.status(413).json({ 
+        message: 'Image too large', 
+        details: 'Groq limit is 4MB for base64 images. Try reducing photo quality.' 
+      });
+    }
+
+    res.status(500).json({ 
+      message: 'AI processing failed', 
+      details: error.message,
+      code: error.status
+    });
   }
 });
 

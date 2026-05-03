@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../context/ThemeContext';
 import api from '../../services/api';
+import * as FileSystem from 'expo-file-system/legacy';
 
 export default function ScanPreviewScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { photoUri, photoBase64 } = useLocalSearchParams();
+  const { photoUri } = useLocalSearchParams<{ photoUri: string }>();
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusText, setStatusText] = useState('');
   const [currentStep, setCurrentStep] = useState(-1);
@@ -26,7 +27,7 @@ export default function ScanPreviewScreen() {
   const STEPS = ['Uploading image...', 'Running OCR...', 'Detecting content...', 'Done!'];
 
   const handleProcessImage = async () => {
-    if (!photoBase64) {
+    if (!photoUri) {
       Alert.alert('Error', 'No image data available. Please retake the photo.');
       return;
     }
@@ -36,13 +37,18 @@ export default function ScanPreviewScreen() {
     setStatusText(STEPS[0]);
 
     try {
+      // Step 0: Convert URI to Base64 (only when processing starts)
+      const base64 = await FileSystem.readAsStringAsync(photoUri, {
+        encoding: 'base64',
+      });
+
       // Step progress for UX feedback while API call runs
       const stepTimer1 = setTimeout(() => { setCurrentStep(1); setStatusText(STEPS[1]); }, 1000);
       const stepTimer2 = setTimeout(() => { setCurrentStep(2); setStatusText(STEPS[2]); }, 2500);
 
       // Call backend vision OCR
       const response = await api.post('/scan/process', {
-        base64: photoBase64,
+        base64: base64,
         mimeType: 'image/jpeg',
       });
 
@@ -75,7 +81,7 @@ export default function ScanPreviewScreen() {
             text: 'Edit First',
             style: 'cancel',
             onPress: () =>
-              router.push({
+              router.replace({
                 pathname: '/screens/mathsolver',
                 params: {
                   scannedQuestion: mathContent || extractedText,
@@ -86,7 +92,7 @@ export default function ScanPreviewScreen() {
           {
             text: 'Solve Now',
             onPress: () =>
-              router.push({
+              router.replace({
                 pathname: '/screens/mathsolver',
                 params: {
                   scannedQuestion: mathContent || extractedText,
@@ -101,7 +107,8 @@ export default function ScanPreviewScreen() {
       setCurrentStep(-1);
       setStatusText('');
       const msg = error.response?.data?.message || 'Failed to process image. Please try again.';
-      Alert.alert('Processing Failed', msg);
+      const details = error.response?.data?.details || error.message;
+      Alert.alert('Processing Failed', `${msg}\n\nDetails: ${details}`);
     }
   };
 
@@ -141,7 +148,7 @@ export default function ScanPreviewScreen() {
             {/* Step progress dots */}
             <View style={styles.progressSteps}>
               {STEPS.map((_, i, arr) => (
-                <React.Fragment key={i}>
+                <Fragment key={i}>
                   <View
                     style={[
                       styles.progressDot,
@@ -160,7 +167,7 @@ export default function ScanPreviewScreen() {
                       ]}
                     />
                   )}
-                </React.Fragment>
+                </Fragment>
               ))}
             </View>
 

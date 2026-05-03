@@ -141,6 +141,8 @@ export default function MathSolver() {
     setHint('');
     setStatus('');
     setIsSolving(false);
+    // Clear URL params to remove the scanned image preview
+    router.setParams({ scannedQuestion: undefined, photoUri: undefined });
   };
 
   const openScanSheet = () => {
@@ -159,15 +161,13 @@ export default function MathSolver() {
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        quality: 0.8,
-        base64: true,
+        quality: 0.5,
       });
       if (!result.canceled && result.assets[0]) {
         router.push({
           pathname: '/screens/scanpreview',
           params: {
             photoUri: result.assets[0].uri,
-            photoBase64: result.assets[0].base64 || '',
           },
         });
       }
@@ -187,15 +187,13 @@ export default function MathSolver() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        quality: 0.8,
-        base64: true,
+        quality: 0.5,
       });
       if (!result.canceled && result.assets[0]) {
         router.push({
           pathname: '/screens/scanpreview',
           params: {
             photoUri: result.assets[0].uri,
-            photoBase64: result.assets[0].base64 || '',
           },
         });
       }
@@ -209,7 +207,13 @@ export default function MathSolver() {
       {/* Dynamic Header */}
       <LinearGradient colors={theme.colors.header} style={styles.header}>
         <View style={styles.headerTop}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
+          <TouchableOpacity 
+            onPress={() => { 
+              handleClear(); 
+              router.replace('/(tabs)'); 
+            }} 
+            style={styles.iconButton}
+          >
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <View style={styles.headerTitleContainer}>
