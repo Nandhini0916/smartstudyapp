@@ -91,8 +91,38 @@ export default function LoginScreen() {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    Alert.alert('Google Sign In', 'Google Sign In will be integrated here.');
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      // NOTE: In a real Expo production app, you would use 'expo-auth-session/providers/google'
+      // and provide your Android/iOS Client IDs from the Google Cloud Console.
+      
+      // Simulating Google Auth Popup for Demo
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Mock Google User Data (This would come from the Google Auth response)
+      const mockGoogleUser = {
+        email: 'demo.user@gmail.com',
+        name: 'Demo Student',
+        profileImage: 'https://avatar.iran.liara.run/public/boy',
+        googleId: 'google_' + Math.random().toString(36).substr(2, 9)
+      };
+
+      // Call our backend /auth/google endpoint
+      const response = await api.post('/auth/google', mockGoogleUser);
+
+      if (response.data.token) {
+        await AsyncStorage.setItem('userToken', response.data.token);
+        await AsyncStorage.setItem('userData', JSON.stringify(response.data.user));
+        
+        router.replace('/(tabs)');
+      }
+    } catch (error: any) {
+      console.error('Google Sign In Error:', error);
+      Alert.alert('Error', 'Google Sign In failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleForgotPassword = () => {

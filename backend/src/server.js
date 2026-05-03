@@ -41,7 +41,7 @@ const socketHandler = require('./socket/socketHandler');
 
 
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes); // Includes Google Login
 app.use('/api/progress', progressRoutes);
 app.use('/api/vocabulary', vocabularyRoutes);
 app.use('/api/documents', documentRoutes);

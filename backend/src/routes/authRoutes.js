@@ -89,6 +89,55 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Google Sign-In
+router.post('/google', async (req, res) => {
+  try {
+    const { email, name, profileImage, googleId } = req.body;
+    
+    let user = await User.findOne({ email });
+    
+    if (!user) {
+      // Create new user if they don't exist
+      user = await User.create({
+        name,
+        email,
+        profileImage,
+        googleId, // Store googleId for future reference
+        password: await bcrypt.hash(Math.random().toString(36), 10), // Random password for social users
+        mobile: ''
+      });
+    } else {
+      // Update existing user with Google info if needed
+      if (profileImage && !user.profileImage) {
+        user.profileImage = profileImage;
+      }
+      if (!user.googleId) {
+        user.googleId = googleId;
+      }
+      user.lastActive = Date.now();
+      await user.save();
+    }
+    
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    
+    res.json({
+      message: 'Google login successful',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        mobile: user.mobile,
+        profileImage: user.profileImage,
+        xp: user.xp,
+        streak: user.streak
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Update Profile
 const auth = require('../middleware/auth');
 router.put('/profile', auth, async (req, res) => {
