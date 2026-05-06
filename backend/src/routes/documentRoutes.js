@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const pdf = require('pdf-parse');
+const { PDFParse } = require('pdf-parse');
 const mammoth = require('mammoth');
 const auth = require('../middleware/auth');
 const OpenAIService = require('../services/openaiService');
@@ -24,8 +24,13 @@ router.post('/analyze', auth, upload.single('document'), async (req, res) => {
     const { mimetype, buffer } = req.file;
 
     if (mimetype === 'application/pdf') {
-      const data = await pdf(buffer);
-      extractedText = data.text;
+      const parser = new PDFParse({ data: buffer });
+      try {
+        const data = await parser.getText();
+        extractedText = data.text;
+      } finally {
+        await parser.destroy();
+      }
     } else if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
                mimetype === 'application/msword') {
       const result = await mammoth.extractRawText({ buffer });
