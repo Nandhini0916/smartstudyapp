@@ -18,7 +18,7 @@ connectDB();
 // Socket.io setup
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:8081',
+    origin: '*',
     methods: ['GET', 'POST']
   }
 });

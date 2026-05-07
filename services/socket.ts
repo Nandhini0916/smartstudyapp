@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Use computer's local IP so physical devices on the same Wi-Fi can connect
-const SOCKET_URL = 'http://10.255.97.241:5000';
+const SOCKET_URL = 'http://192.168.137.170:5000';
 
 class SocketService {
   socket: any = null;

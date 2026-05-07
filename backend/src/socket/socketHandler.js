@@ -13,16 +13,20 @@ module.exports = (io) => {
     });
 
     socket.on('math-query', async (data, callback) => {
+      console.log('--- RECEIVED MATH QUERY ---');
+      console.log('Data:', JSON.stringify(data));
       const { userId } = data;
       const problem = data.problem || data.query;
 
-      
       try {
+        console.log('Processing problem:', problem);
         // Emit processing status
         socket.emit('math-processing', { status: 'processing' });
         
         // Get AI solution
+        console.log('Calling AIService...');
         const solution = await OpenAIService.getMathSolution(problem);
+        console.log('AI Solution received');
 
         
         // Emit step-by-step in real-time

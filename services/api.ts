@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
 // Use computer's local IP so physical devices on the same Wi-Fi can connect
-const API_URL = 'http://10.255.97.241:5000/api';
+const API_URL = 'http://192.168.137.170:5000/api';
 
 const api = axios.create({
   baseURL: API_URL,
