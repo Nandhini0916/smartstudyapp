@@ -76,7 +76,8 @@ class AIService {
           {
             role: 'system',
             content:
-              'Extract difficult words (7+ letters) from the text and provide simple definitions. ' +
+              'Extract complex, academic, or technical words from the text that a student might find difficult or important to learn. ' +
+              'Do not rely on character length alone; focus on educational value and vocabulary complexity. ' +
               'Return ONLY valid JSON (no markdown fences) with a single key "results" containing an array of objects. ' +
               'Each object must have: word (string), definition (string), partOfSpeech (string).',
           },
