@@ -91,7 +91,7 @@ export default function SignupScreen() {
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Create Account</Text>
-          <Text style={styles.headerSubtitle}>Join SmartStudy today</Text>
+          <Text style={styles.headerSubtitle}>Join Mentivio today</Text>
         </LinearGradient>
 
         <View style={styles.formContainer}>
@@ -167,11 +167,13 @@ export default function SignupScreen() {
           </View>
 
           <View style={styles.termsContainer}>
-            <Text style={[styles.termsText, { color: theme.colors.subtext }]}>
-              By signing up, you agree to our{' '}
-              <Text style={[styles.termsLink, { color: theme.colors.primary }]}>Terms of Service</Text> and{' '}
-              <Text style={[styles.termsLink, { color: theme.colors.primary }]}>Privacy Policy</Text>
-            </Text>
+            <TouchableOpacity onPress={() => router.push('/screens/about')}>
+              <Text style={[styles.termsText, { color: theme.colors.subtext }]}>
+                By signing up, you agree to our{' '}
+                <Text style={[styles.termsLink, { color: theme.colors.primary }]}>Terms of Service</Text> and{' '}
+                <Text style={[styles.termsLink, { color: theme.colors.primary }]}>Privacy Policy</Text>
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity

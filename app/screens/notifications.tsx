@@ -4,15 +4,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../context/ThemeContext';
+import { useSettings } from '../../context/SettingsContext';
 
 export default function NotificationsScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-
-  const [pushNotifs, setPushNotifs] = React.useState(true);
-  const [emailNotifs, setEmailNotifs] = React.useState(false);
-  const [weeklyReports, setWeeklyReports] = React.useState(true);
-  const [newFeatures, setNewFeatures] = React.useState(true);
+  const { 
+    pushNotifications, setPushNotifications,
+    emailAlerts, setEmailAlerts,
+    featureAnnouncements, setFeatureAnnouncements 
+  } = useSettings();
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -33,7 +34,7 @@ export default function NotificationsScreen() {
               <Ionicons name="notifications-outline" size={22} color={theme.colors.subtext} />
               <Text style={[styles.settingText, { color: theme.colors.text }]}>Push Notifications</Text>
             </View>
-            <Switch value={pushNotifs} onValueChange={setPushNotifs} trackColor={{ true: theme.colors.primary, false: '#ddd' }} />
+            <Switch value={pushNotifications} onValueChange={setPushNotifications} trackColor={{ true: theme.colors.primary, false: '#ddd' }} />
           </View>
           <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
           
@@ -42,28 +43,21 @@ export default function NotificationsScreen() {
               <Ionicons name="mail-outline" size={22} color={theme.colors.subtext} />
               <Text style={[styles.settingText, { color: theme.colors.text }]}>Email Alerts</Text>
             </View>
-            <Switch value={emailNotifs} onValueChange={setEmailNotifs} trackColor={{ true: theme.colors.primary, false: '#ddd' }} />
+            <Switch value={emailAlerts} onValueChange={setEmailAlerts} trackColor={{ true: theme.colors.primary, false: '#ddd' }} />
           </View>
         </View>
 
         <View style={[styles.section, { backgroundColor: theme.colors.card, marginTop: 20 }]}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Updates & Reports</Text>
           
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <Ionicons name="stats-chart-outline" size={22} color={theme.colors.subtext} />
-              <Text style={[styles.settingText, { color: theme.colors.text }]}>Weekly Progress Report</Text>
-            </View>
-            <Switch value={weeklyReports} onValueChange={setWeeklyReports} trackColor={{ true: theme.colors.primary, false: '#ddd' }} />
-          </View>
-          <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
+
           
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
               <Ionicons name="sparkles-outline" size={22} color={theme.colors.subtext} />
               <Text style={[styles.settingText, { color: theme.colors.text }]}>New Feature Announcements</Text>
             </View>
-            <Switch value={newFeatures} onValueChange={setNewFeatures} trackColor={{ true: theme.colors.primary, false: '#ddd' }} />
+            <Switch value={featureAnnouncements} onValueChange={setFeatureAnnouncements} trackColor={{ true: theme.colors.primary, false: '#ddd' }} />
           </View>
         </View>
       </ScrollView>

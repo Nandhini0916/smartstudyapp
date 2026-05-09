@@ -22,12 +22,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import socketService from '../../services/socket';
 import { useTheme } from '../../context/ThemeContext';
+import { useSettings } from '../../context/SettingsContext';
 
 const { width, height } = Dimensions.get('window');
 
 export default function MathSolver() {
   const router = useRouter();
   const { theme, isDarkMode } = useTheme();
+  const { autoSaveEnabled } = useSettings();
   const { scannedQuestion, photoUri } = useLocalSearchParams();
   const [problem, setProblem] = useState('');
   const [isSolving, setIsSolving] = useState(false);
@@ -103,6 +105,22 @@ export default function MathSolver() {
     };
   }, [scannedQuestion, photoUri]);
 
+  // Load auto-saved problem
+  useEffect(() => {
+    if (autoSaveEnabled && !scannedQuestion) {
+      AsyncStorage.getItem('lastMathProblem').then(saved => {
+        if (saved) setProblem(saved);
+      });
+    }
+  }, [autoSaveEnabled]);
+
+  // Save problem automatically
+  useEffect(() => {
+    if (autoSaveEnabled && problem) {
+      AsyncStorage.setItem('lastMathProblem', problem);
+    }
+  }, [problem, autoSaveEnabled]);
+
   const loadUserId = async () => {
     try {
       const userData = await AsyncStorage.getItem('userData');
@@ -143,6 +161,9 @@ export default function MathSolver() {
     setIsSolving(false);
     // Clear URL params to remove the scanned image preview
     router.setParams({ scannedQuestion: undefined, photoUri: undefined });
+    if (autoSaveEnabled) {
+      AsyncStorage.removeItem('lastMathProblem');
+    }
   };
 
   const openScanSheet = () => {

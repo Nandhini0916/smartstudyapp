@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "SmartStudyApp",
-    "slug": "SmartStudyApp",
+    "name": "Mentivio",
+    "slug": "mentivio",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "smartstudyapp",
+    "icon": "./assets/images/logo.png",
+    "scheme": "mentivio",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -30,7 +30,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#4A6CF7",

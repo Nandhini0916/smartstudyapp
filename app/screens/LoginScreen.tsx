@@ -12,6 +12,7 @@ import {
   Alert,
   Animated,
   Image,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -19,6 +20,8 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../services/api';
 import { useTheme } from '../../context/ThemeContext';
+
+const { width } = Dimensions.get('window');
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -149,8 +152,12 @@ export default function LoginScreen() {
           colors={theme.colors.header}
           style={styles.header}
         >
-          <MaterialCommunityIcons name="brain" size={80} color="#fff" />
-          <Text style={styles.appName}>SmartStudy</Text>
+          <Image 
+            source={require('../../assets/images/logo.png')} 
+            style={{ width: width * 0.25, height: width * 0.25, marginBottom: 15, borderRadius: 20 }} 
+            resizeMode="contain" 
+          />
+          <Text style={styles.appName}>Mentivio</Text>
           <Text style={styles.tagline}>Learn Smarter with AI</Text>
         </LinearGradient>
 

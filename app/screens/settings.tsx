@@ -4,13 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../context/ThemeContext';
+import { useSettings } from '../../context/SettingsContext';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { theme, isDarkMode, toggleDarkMode } = useTheme();
-
-  const [sounds, setSounds] = React.useState(true);
-  const [autoSave, setAutoSave] = React.useState(true);
+  const { autoSaveEnabled, setAutoSaveEnabled } = useSettings();
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -38,15 +37,7 @@ export default function SettingsScreen() {
             />
           </View>
           
-          <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
-          
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <Ionicons name="volume-high-outline" size={22} color={theme.colors.subtext} />
-              <Text style={[styles.settingText, { color: theme.colors.text }]}>Sound Effects</Text>
-            </View>
-            <Switch value={sounds} onValueChange={setSounds} trackColor={{ true: theme.colors.primary, false: '#ddd' }} />
-          </View>
+
 
           <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
           
@@ -55,7 +46,7 @@ export default function SettingsScreen() {
               <Ionicons name="save-outline" size={22} color={theme.colors.subtext} />
               <Text style={[styles.settingText, { color: theme.colors.text }]}>Auto-Save Work</Text>
             </View>
-            <Switch value={autoSave} onValueChange={setAutoSave} trackColor={{ true: theme.colors.primary, false: '#ddd' }} />
+            <Switch value={autoSaveEnabled} onValueChange={setAutoSaveEnabled} trackColor={{ true: theme.colors.primary, false: '#ddd' }} />
           </View>
         </View>
       </ScrollView>

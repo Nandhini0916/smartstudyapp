@@ -22,9 +22,9 @@ export default function SupportScreen() {
       <ScrollView style={styles.content}>
         <View style={[styles.contactCard, { backgroundColor: theme.colors.card }]}>
           <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Contact Us</Text>
-          <Text style={[styles.cardDesc, { color: theme.colors.subtext }]}>Need help with SmartStudyApp? Our team is here for you.</Text>
+          <Text style={[styles.cardDesc, { color: theme.colors.subtext }]}>Need help with Mentivio? Our team is here for you.</Text>
           
-          <TouchableOpacity style={[styles.contactButton, { backgroundColor: theme.colors.primary }]} onPress={() => Linking.openURL('mailto:support@smartstudy.com')}>
+          <TouchableOpacity style={[styles.contactButton, { backgroundColor: theme.colors.primary }]} onPress={() => Linking.openURL('mailto:support@mentivio.com')}>
             <Ionicons name="mail" size={20} color="#fff" />
             <Text style={styles.contactButtonText}>Email Support</Text>
           </TouchableOpacity>

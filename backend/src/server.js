@@ -32,7 +32,7 @@ app.use(express.json({ limit: '10mb' }));
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
-const progressRoutes = require('./routes/progressRoutes');
+
 const vocabularyRoutes = require('./routes/vocabularyRoutes');
 const documentRoutes = require('./routes/documentRoutes');
 const scanRoutes = require('./routes/scanRoutes');
@@ -42,7 +42,7 @@ const socketHandler = require('./socket/socketHandler');
 
 // Routes
 app.use('/api/auth', authRoutes); // Includes Google Login
-app.use('/api/progress', progressRoutes);
+
 app.use('/api/vocabulary', vocabularyRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/scan', scanRoutes);
